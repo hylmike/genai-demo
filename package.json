@@ -1,0 +1,9 @@
+{
+  "name": "genai-demo",
+  "version": "1.0.0",
+  "packageManager": "yarn@4.2.2",
+  "author": "Michael Hua",
+  "scripts": {
+    "dev:frontend": "cd frontend && yarn dev"
+  }
+}
