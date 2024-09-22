@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from dotenv import load_dotenv
-from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass
+from sqlalchemy.orm import DeclarativeBase
 
 from api.utils.custom_exceptions import MissingEnvVariableError
 
@@ -26,7 +26,7 @@ if DB_URL == "":
 DB_URL.replace("{{DB_PASS}}", DB_PASS)
 
 
-class Base(DeclarativeBase, MappedAsDataclass):
+class Base(DeclarativeBase):
     """Base class for DB models"""
 
     # setting for execute default func (created) under async scenarip

@@ -42,6 +42,6 @@ async def create_user(db: AsyncSession, user_input: UserForm) -> User:
         user = await UserModel.create(db, **user_input.model_dump())
     except Exception:
         raise HTTPException(
-            status_code=500, detail=f"Faied to create user {user.username}"
+            status_code=500, detail=f"Faied to create user {user_input.username}"
         )
     return user

@@ -1,5 +1,7 @@
 """All DB models related to user management"""
 
+import logging
+
 from sqlalchemy import Column, Integer, String, DateTime, select
 from sqlalchemy.sql import func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,16 +23,19 @@ class User(Base):
 
     @classmethod
     async def create(cls, db: AsyncSession, **kwargs):
-        user = cls(**kwargs)
-        db.add(user)
-        await db.commit()
-        await db.refresh(user)
+        try:
+            user = cls(**kwargs)
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
+        except Exception as e:
+            logging.exception(f"Failed to insert user: {e}")
         return user
 
     @classmethod
     async def find_all(cls, db: AsyncSession):
         query = await db.execute(select(cls))
-        return query.all()
+        return query.scalars().all()
 
     @classmethod
     async def find_by_id(cls, db: AsyncSession, id: int):
@@ -39,5 +44,5 @@ class User(Base):
 
     @classmethod
     async def find_by_name(cls, db: AsyncSession, name: str):
-        user = (await db.execute(select(cls).where(cls.username == name))).first()
+        user = (await db.scalars(select(cls).where(cls.username == name))).first()
         return user

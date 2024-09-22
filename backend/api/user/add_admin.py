@@ -22,8 +22,8 @@ async def add_admin():
         user = await create_user(async_session, UserForm.model_validate(user_input))
         print(f"Following is created admin user:\n{jsonable_encoder(user)}")
         await async_session.commit()
-    except Exception:
-        print("Failed to create admin user")
+    except Exception as e:
+        print(f"Failed to create admin user: {e}")
         await async_session.rollback()
     finally:
         await async_session.close()
