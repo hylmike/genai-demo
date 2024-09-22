@@ -11,6 +11,8 @@
 
 #!.yarn/cache
 .pnp.*
+*.pyc
+__pycache__
 
 .env
 .venv

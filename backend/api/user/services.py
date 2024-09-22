@@ -1,10 +1,17 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import NoResultFound
 from fastapi import HTTPException
+from passlib.context import CryptContext
 
 from .schemas import User, UserForm
 from .models import User as UserModel
-from api.auth.services import hash_password
+
+
+pw_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def hash_password(password: str) -> str:
+    return pw_context.hash(password)
 
 
 async def get_all_users(db: AsyncSession) -> list[User]:

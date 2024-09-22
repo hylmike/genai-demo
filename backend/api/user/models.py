@@ -30,7 +30,7 @@ class User(Base):
     @classmethod
     async def find_all(cls, db: AsyncSession):
         query = await db.execute(select(cls))
-        return query.scalars().all()
+        return query.all()
 
     @classmethod
     async def find_by_id(cls, db: AsyncSession, id: int):
@@ -39,5 +39,5 @@ class User(Base):
 
     @classmethod
     async def find_by_name(cls, db: AsyncSession, name: str):
-        user = (await db.scalars(select(cls).where(cls.username == name))).first()
+        user = (await db.execute(select(cls).where(cls.username == name))).first()
         return user

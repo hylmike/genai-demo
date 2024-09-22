@@ -12,6 +12,10 @@ fastapi = {extras = ["standard"], version = "^0.115.0"}
 sqlalchemy = "^2.0.35"
 asyncpg = "^0.29.0"
 alembic = "^1.13.2"
+bcrypt = "^4.2.0"
+pyjwt = "^2.9.0"
+passlib = "^1.7.4"
+pydantic = {extras = ["email"], version = "^2.9.2"}
 
 
 [tool.poetry.group.dev.dependencies]

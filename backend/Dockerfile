@@ -27,6 +27,4 @@ ENV VIRTUAL_ENV=/home/backend/.venv \
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY api /home/backend/api 
-
-ENTRYPOINT ["python", "-m", "api.server"]
+COPY api /home/backend/api

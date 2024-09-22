@@ -1,0 +1,2 @@
+class MissingEnvVariableError(Exception):
+    pass

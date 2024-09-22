@@ -15,13 +15,12 @@ from api.user.users_router import router as users_router
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
-# Create all tables if not exist
-asyncio.run(create_all_tables())
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Function handles app startup and shutdown events"""
+    await create_all_tables()
     yield
     if session_manager._engin is not None:
         await session_manager.close()
@@ -42,7 +41,7 @@ server.add_middleware(
 
 @server.get("/check_api")
 async def check_api():
-    return {"status": "Connected to Auth API successfully"}
+    return {"status": "Connected to API successfully"}
 
 
 # Routers

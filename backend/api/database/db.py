@@ -3,7 +3,7 @@
 import os
 import contextlib
 from typing import Any
-from abc import AsyncIterator
+from collections.abc import AsyncIterator
 
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -14,8 +14,16 @@ from sqlalchemy.ext.asyncio import (
 from dotenv import load_dotenv
 from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass
 
+from api.utils.custom_exceptions import MissingEnvVariableError
+
 load_dotenv()
 DB_URL = os.getenv("DB_URL", "")
+DB_PASS = os.getenv("DB_URL", "")
+if DB_URL == "":
+    raise MissingEnvVariableError(
+        "Database URL environment variable not exist or invalid"
+    )
+DB_URL.replace("{{DB_PASS}}", DB_PASS)
 
 
 class Base(DeclarativeBase, MappedAsDataclass):
@@ -65,7 +73,7 @@ class DBSessionManager:
         self._sessionmaker = None
 
 
-db_engin = create_async_engine(DB_URL, {"echo": True})
+db_engin = create_async_engine(DB_URL, echo=True)
 session_manager = DBSessionManager(DB_URL, {"echo": True})
 
 
