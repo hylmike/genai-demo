@@ -18,12 +18,12 @@ from api.utils.custom_exceptions import MissingEnvVariableError
 
 load_dotenv()
 DB_URL = os.getenv("DB_URL", "")
-DB_PASS = os.getenv("DB_URL", "")
+DB_PASS = os.getenv("DB_PASS", "")
 if DB_URL == "":
     raise MissingEnvVariableError(
         "Database URL environment variable not exist or invalid"
     )
-DB_URL.replace("{{DB_PASS}}", DB_PASS)
+DB_URL = DB_URL.replace("{{DB_PASS}}", DB_PASS)
 
 
 class Base(DeclarativeBase):

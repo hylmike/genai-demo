@@ -1,5 +1,7 @@
 PORT=3100
-DB_URL=postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}
+DB_URL=postgresql+asyncpg://syntax_admin:{DB_PASSWORD}@db:5432/ai_assistant
+# This DB pass should be same as content in db_password.txt
+DB_PASS=XXXXX
 ACCESS_TOKEN_SECRET=XXXXX
 ACCESS_TOKEN_EXPIRES_IN=30
 OPENAI_API_KEY=XXXXX

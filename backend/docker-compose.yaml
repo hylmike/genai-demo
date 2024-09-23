@@ -7,7 +7,7 @@ services:
       - "5431:5432"
     environment:
       POSTGRES_USER: "syntax_admin"
-      POSTGRES_PASSWORD: /run/secrets/db_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
       POSTGRES_DB: "ai_assistant"
       POSTGRES_HOST_AUTH_METHOD: trust
     healthcheck:
@@ -26,24 +26,15 @@ services:
     command: bash -c "uvicorn api.server:server --reload --host 0.0.0.0 --port 3100"
     ports:
       - "3100:3100"
-    environment:
-      DB_URL: "postgresql+asyncpg://syntax_admin:{{DB_PASS}}@db:5432/ai_assistant"
-      DB_PASS: /run/secrets/db_password
-      ACCESS_TOKEN_SECRET: /run/secrets/jwt_secret
-      ACCESS_TOKEN_EXPIRES_IN: "30"
+    env_file: "../.env"
     depends_on:
       db:
         condition: service_healthy
         restart: true
     volumes:
       - ./api:/home/backend/api
-    secrets:
-      - db_password
-      - jwt_secret
 volumes:
   db_data:
 secrets:
   db_password:
-    file: db_password.txt
-  jwt_secret:
-    file: jwt_secret.txt
+    file: ./db_password.txt

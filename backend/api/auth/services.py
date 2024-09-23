@@ -12,7 +12,7 @@ from api.user import services as user_services
 
 load_dotenv()
 
-ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET", False)
+ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET", "")
 ACCESS_TOKEN_ALGORITHM = "HS256"
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token")

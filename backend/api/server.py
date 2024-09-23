@@ -1,7 +1,6 @@
 import os
 import logging
 from contextlib import asynccontextmanager
-import asyncio
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +10,7 @@ import uvicorn
 from api.database.db import session_manager, create_all_tables
 from api.auth.auth_router import router as auth_router
 from api.user.users_router import router as users_router
+from api.ai_assistant.genai_router import router as genai_router
 
 load_dotenv()
 
@@ -56,6 +56,12 @@ server.include_router(
     prefix="/api/auth",
     tags=["auth"],
     responses={401: {"description": "You are not authorized"}},
+)
+server.include_router(
+    genai_router,
+    prefix="/api/genai",
+    tags=["genai"],
+    responses={404: {"description": "Not Found"}},
 )
 
 
