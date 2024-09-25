@@ -1,14 +1,14 @@
+import os
+
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
-from langchain_chroma import Chroma
-from langchain_openai import embeddings
 from langchain_community.document_loaders import WebBaseLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import bs4
 import chromadb
-from uuid import uuid4
+from chromadb.utils import embedding_functions
 
 from .schemas import ChatRecord
 from .models import Chat as ChatModel
@@ -16,7 +16,19 @@ from api.database.db import AsyncSession
 
 VS_COLLECTION_NAME = "syntax_demo_collection"
 
-vector_store_from_client = None
+
+def get_chroma_collection():
+    chroma_client = chromadb.PersistentClient(path="/chroma_db")
+    openai_ef = embedding_functions.OpenAIEmbeddingFunction(
+        api_key=os.environ["OPENAI_API_KEY"],
+        model_name="text-embedding-3-small",
+    )
+
+    collection = chroma_client.get_or_create_collection(
+        name=VS_COLLECTION_NAME, embedding_function=openai_ef
+    )
+
+    return collection
 
 
 async def find_human_chat_history(db: AsyncSession, user_id: int):
@@ -27,9 +39,15 @@ async def find_human_chat_history(db: AsyncSession, user_id: int):
 
 
 async def gen_ai_completion(db: AsyncSession, user_id: int, question: str) -> str:
-    global vector_store_from_client
-    # retrieved_results = vector_store_from_client.similarity_search(question, k=3)
-    # retrieved_context = [f"{result.page_content}\n" for result in retrieved_results]
+    store_collection = get_chroma_collection()
+    retrieved_result = store_collection.query(
+        query_texts=[question],
+        n_results=3,
+    )
+    retrieved_context = ""
+    for element in retrieved_result["documents"]:
+        if element:
+            retrieved_context += element[0]
 
     chat_human_history = await find_human_chat_history(db, user_id)
 
@@ -37,6 +55,7 @@ async def gen_ai_completion(db: AsyncSession, user_id: int, question: str) -> st
 
     prompt_template = """Answer the question with your knowledge and following context:
 {context}
+Result should be brief and not more than 100 words.
 
 Question: {question}
 """
@@ -49,7 +68,7 @@ Question: {question}
         | StrOutputParser()
     )
     completion = await chain.ainvoke(
-        {"question": question, "context": f"{chat_human_history}\n"}
+        {"question": question, "context": f"{chat_human_history}\n{retrieved_context}"}
     )
     await ChatModel.create(db, user_id=user_id, role_type="AI", content=completion)
 
@@ -62,9 +81,7 @@ async def get_chat_history(db: AsyncSession, user_id: int) -> list[ChatRecord]:
 
 
 def gen_knowledgebase() -> None:
-    global vector_store_from_client
-    persistent_client = chromadb.PersistentClient()
-    collection = persistent_client.get_or_create_collection(VS_COLLECTION_NAME)
+    collection = get_chroma_collection()
 
     # For this demo, only parse text in gen-ai page
     strainer = bs4.SoupStrainer("p")
@@ -80,10 +97,5 @@ def gen_knowledgebase() -> None:
 
     collection.add(
         documents=[doc.page_content for doc in docs],
-        ids=[str(uuid4()) for _ in range(len(docs))],
-    )
-    vector_store_from_client = Chroma(
-        client=persistent_client,
-        collection_name=VS_COLLECTION_NAME,
-        embedding_function=embeddings,
+        ids=[f"id{index}" for index in range(len(docs))],
     )
