@@ -11,6 +11,8 @@ from api.database.db import session_manager, create_all_tables
 from api.auth.auth_router import router as auth_router
 from api.user.users_router import router as users_router
 from api.ai_assistant.genai_router import router as genai_router
+from api.user.services import create_user, get_all_users
+from api.user.schemas import UserForm
 
 load_dotenv()
 
@@ -21,6 +23,14 @@ logging.basicConfig(level=logging.INFO)
 async def lifespan(app: FastAPI):
     """Function handles app startup and shutdown events"""
     await create_all_tables()
+    # Create default admin user for demo purpose
+    async with session_manager.session() as session:
+        all_users = await get_all_users(session)
+        if len(all_users) == 0:
+            await create_user(
+                session,
+                UserForm(username="admin", password="54321", email="admin@test.com"),
+            )
     yield
     if session_manager._engin is not None:
         await session_manager.close()
@@ -28,7 +38,7 @@ async def lifespan(app: FastAPI):
 
 server = FastAPI(lifespan=lifespan, debug=True)
 
-origins = ["http://localhost"]
+origins = ["http://localhost:4000"]
 
 server.add_middleware(
     CORSMiddleware,

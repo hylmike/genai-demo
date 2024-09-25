@@ -26,7 +26,7 @@ services:
     command: bash -c "uvicorn api.server:server --reload --host 0.0.0.0 --port 3100"
     ports:
       - "3100:3100"
-    env_file: "../.env"
+    env_file: "./.env"
     depends_on:
       db:
         condition: service_healthy

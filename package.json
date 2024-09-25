@@ -1,9 +1,16 @@
 {
   "name": "genai-demo",
   "version": "1.0.0",
-  "packageManager": "yarn@4.2.2",
-  "author": "Michael Hua",
+  "description": "Generative RAG powered AI assistant",
+  "main": "index.js",
   "scripts": {
-    "dev:frontend": "cd frontend && yarn dev"
-  }
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && docker compose up"
+  },
+  "keywords": [
+    "GenAI",
+    "RAG"
+  ],
+  "author": "Michael",
+  "license": "ISC"
 }

@@ -1,5 +1,5 @@
 # First build builder image, used for building virtual environment
-FROM python:3.12-bullseye as builder
+FROM python:3.12.6-bookworm as builder
 
 RUN pip install poetry==1.8.3
 
@@ -19,7 +19,7 @@ RUN touch README.md
 RUN poetry install --without dev --no-root && rm -rf ${POETRY_CACHE_DIR}
 
 # Build runtime image, used to run as the backend
-FROM python:3.12-slim-bullseye as backend
+FROM python:3.12-slim-bookworm as backend
 
 ENV VIRTUAL_ENV=/home/backend/.venv \
     PATH="/home/backend/.venv/bin:$PATH" \

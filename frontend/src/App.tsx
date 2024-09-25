@@ -1,34 +1,113 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { ChangeEvent, useEffect, useState } from 'react';
+import './App.css';
+import { Button, TextField, Typography } from '@mui/material';
+import { AccountCircle, SmartToy } from '@mui/icons-material';
+import { useAuth } from './auth/AuthProvider';
+import { Navigate } from 'react-router-dom';
+import { ChatRecord } from './auth/auth-interface';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [question, setQuestion] = useState('')
+  const [chatHistory, setChatHistory] = useState<ChatRecord[]>([])
+  const auth = useAuth()
+  const baseUrl = `${import.meta.env.VITE_API_URL}/api/genai`;
+
+  useEffect(() => {
+    if (auth.token === '') {
+      return
+    }
+    const load_chat_history = async () => {
+      const res = await fetch(`${baseUrl}/chat-history`, {
+        method: "GET",
+        headers: { "content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+      });
+      const data = await res.json();
+      setChatHistory(data.chat_history)
+    }
+    load_chat_history()
+  }, [auth.token, baseUrl])
+
+  if (auth.token === '') {
+    return <Navigate to='/login' />
+  }
+
+  const handleChangeQuestion = (event: ChangeEvent<HTMLInputElement>) => {
+    setQuestion(event.target.value)
+  }
+
+  const handleKeyPress = async (event: { key: string; }) => {
+    if (event.key === 'Enter' && question.trim() !== '') {
+      const res = await fetch(`${baseUrl}/completion`, {
+        method: "POST",
+        headers: { "content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify({ question }),
+      });
+      const data = await res.json();
+      setChatHistory([
+        ...chatHistory, 
+        { role_type: "HUMAN", content: question },
+        { role_type: "AI", content: data.completion },
+      ])
+      setQuestion('')
+    }
+  }
+
+  const handleGenKnowledgeBase = async () => {
+    const res = await fetch(`${baseUrl}/gen-knowledgebase`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${auth.token}` },
+    });
+    if (res.status === 200) {
+      prompt("Successfully generate knowledge base in backend!")
+    }
+  }
+
+  const handleLogout = () => {
+    auth.logout()
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className='main-container'>
+      <div className='title-container'>
+        <Button 
+          variant='contained' 
+          size='small'
+          onClick={handleGenKnowledgeBase}
+        >
+          Generate RAG Knowledge Base
+        </Button>
+        <h2 className='title'>AI Assitant</h2>
+        <div className='user-section'>
+          <Typography className='user-greeting'>Hi, {auth.user}</Typography>
+          <Button 
+            variant='contained' 
+            size='small'
+            onClick={handleLogout}
+          >
+            Logout
+          </Button>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      <div className='chat-history'>
+        {chatHistory?.map((record, index) => (
+          <div key={index} className='chat-container'>
+            {record.role_type === "AI" ? <SmartToy className='ai-logo' /> : <AccountCircle className='human-logo' />}
+            <Typography className='chat-content'>{record.content}</Typography>
+          </div>
+        ))}
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      <div className="question-container">
+        <AccountCircle className='question-logo' />
+        <TextField 
+          fullWidth
+          value={question}
+          className='text-field'
+          size='small'
+          onChange={handleChangeQuestion}
+          onKeyDown={handleKeyPress}
+        />
+      </div>
+    </div>
   )
 }
 
