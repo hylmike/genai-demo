@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useRef, useEffect, useState } from 'react';
 import './App.css';
 import { Button, TextField, Typography } from '@mui/material';
 import { AccountCircle, SmartToy } from '@mui/icons-material';
@@ -9,6 +9,7 @@ import { ChatRecord } from './auth/auth-interface';
 function App() {
   const [question, setQuestion] = useState('')
   const [chatHistory, setChatHistory] = useState<ChatRecord[]>([])
+  const messageEndRef = useRef(null)
   const auth = useAuth()
   const baseUrl = `${import.meta.env.VITE_API_URL}/api/genai`;
 
@@ -26,6 +27,14 @@ function App() {
     }
     load_chat_history()
   }, [auth.token, baseUrl])
+
+  useEffect(() => {
+    if (messageEndRef?.current && chatHistory.length) {
+      console.log(messageEndRef);
+      
+      messageEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }
+  }, [messageEndRef, chatHistory.length])
 
   if (auth.token === '') {
     return <Navigate to='/login' />
@@ -95,6 +104,7 @@ function App() {
             <Typography className='chat-content'>{record.content}</Typography>
           </div>
         ))}
+        <div className='virtual-div' ref={messageEndRef} />
       </div>
       <div className="question-container">
         <AccountCircle className='question-logo' />
