@@ -25,12 +25,17 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
             method: "POST",
             body: formData
         });
-        const data = await res.json();
-        setUser(username)
-        setToken(data.access_token)
-        saveUser(username);
-        saveToken(data.access_token);
-        navigate('/');
+        if (res.status === 200) {
+            const data = await res.json();
+            setUser(username)
+            setToken(data.access_token)
+            saveUser(username);
+            saveToken(data.access_token);
+            navigate('/');
+        } else {
+            alert('Invalid username or password, login failed')
+            navigate('/login')
+        }
     }
 
     const logout = () => {

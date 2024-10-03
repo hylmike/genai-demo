@@ -35,12 +35,12 @@ function App() {
   }, [auth.token, baseUrl])
 
   useEffect(() => {
-    if (messageEndRef?.current && chatHistory.length) {
+    if (messageEndRef?.current && chatHistory?.length) {
       console.log(messageEndRef);
       
       messageEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }
-  }, [messageEndRef, chatHistory.length])
+  }, [messageEndRef, chatHistory?.length])
 
   if (auth.token === '') {
     return <Navigate to='/login' />
