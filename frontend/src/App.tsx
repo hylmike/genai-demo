@@ -5,10 +5,16 @@ import { AccountCircle, SmartToy } from '@mui/icons-material';
 import { useAuth } from './auth/AuthProvider';
 import { Navigate } from 'react-router-dom';
 import { ChatRecord } from './auth/auth-interface';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 function App() {
   const [question, setQuestion] = useState('')
   const [chatHistory, setChatHistory] = useState<ChatRecord[]>([])
+  const [openDialog, setOpenDialog] = useState(false)
   const messageEndRef = useRef(null)
   const auth = useAuth()
   const baseUrl = `${import.meta.env.VITE_API_URL}/api/genai`;
@@ -67,12 +73,16 @@ function App() {
       headers: { Authorization: `Bearer ${auth.token}` },
     });
     if (res.status === 200) {
-      prompt("Successfully generate knowledge base in backend!")
+      setOpenDialog(true)
     }
   }
 
   const handleLogout = () => {
     auth.logout()
+  }
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false)
   }
 
   return (
@@ -117,6 +127,24 @@ function App() {
           onKeyDown={handleKeyPress}
         />
       </div>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Task Completion Notice"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Successfully generated RAG knowledge base in backend!
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   )
 }

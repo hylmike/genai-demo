@@ -15,9 +15,9 @@
 
 ## Testing
 - In root folder run 'npm run dev:backend' to start backend, which will set up API and DB in docker
-- In root folder run 'npm run dev:frontend' to start frontend, you need log in to test service. Url to access app locally is:
+- First run 'npm install' command to install all dependencies in frontend folder. Then in root folder run 'npm run dev:frontend' to start frontend, you need log in to test service. Url to access app locally is:
     - http://localhost:4000/
-- For testing purpose, I have insert a admin uesr with following config"
+- For testing purpose, I have inserted a admin uesr with following config"
     - username: admin
     - password: 54321
 - As backend use FastAPI, you also can access all API endpoints and docs with this local url:
